@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DHT Readings</title>
+    <style type="text/css">
+        body {
+            background-color: #F5F5F5;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .data-container {
+            display: flex;
+            justify-content: space-between;
+            width: 50%;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #FFF;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .data-item {
+            text-align: center;
+        }
+
+        .data-item h2 {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .data-item p {
+            font-size: 48px;
+            font-weight: bold;
+            color: #6EB7FF;
+        }
+
+        .data-head {
+            margin: auto;
+            width: 50%;
+            text-align: center;
+            font-size: 45px;
+            font-weight: bold;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #FFF;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="data-head">Smart Evacuation System</div>
+
+    <div class="data-container">
+        
+        <div class="data-item">
+            <h2>Path</h2>
+            <p class="value" id="humidity">Nothing</p>
+        </div>
+    </div>
+
+    <a href="#" class="redirect-button" id="redirect-button">Go to City Map</a>
+
+    <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js"></script>
+
+    <script type="module">
+    
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
+ 
+        const firebaseConfig = {
+            apiKey: "AIzaSyA_-8ke0wle5RIuwX7BK6VEd6XWz_gfIVc",
+            authDomain: "embedded-1system.firebaseapp.com",
+            databaseURL: "https://embedded-1system-default-rtdb.firebaseio.com",
+            projectId: "embedded-1system",
+            storageBucket: "embedded-1system.appspot.com",
+            messagingSenderId: "865674009322",
+            appId: "1:865674009322:web:0e767f623af64ee177d593",
+            measurementId: "G-PBM9KRRSV5"
+        };
+
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+   
+        
+        const dataRef1 = ref(database, 'PathB/PathB');
+        
+      
+
+        
+        onValue(dataRef1, (snapshot) => {
+            const humi = snapshot.val();
+            document.getElementById('humidity').innerHTML = humi;
+
+            localStorage.setItem('path', humi);
+            document.getElementById('redirect-button').href = `index.html?path=${encodeURIComponent(humi)}`;
+            console.log(humi);
+
+
+        });
+
+       
+    </script>
+</body>
+
+</html>

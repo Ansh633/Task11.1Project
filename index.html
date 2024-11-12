@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connected City Map with Highlighted Roads</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <style>
+        #map {
+            height: 600px;
+            width: 100%;
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Connected City Map with Highlighted Roads</h1>
+    <div id="map"></div>
+
+    <script>
+        // Initialize the map with arbitrary center and simple CRS
+        const map = L.map('map', {
+            crs: L.CRS.Simple,
+            minZoom: -1.5,
+            maxZoom: 2
+        });
+
+        // Set bounds for a blank map layout
+        const bounds = [[0, 0], [1000, 1000]];
+        map.fitBounds(bounds);
+
+        // Define key points with coordinates
+        const points = {
+            p1: [183, 115],
+            p2: [315, 108],
+            p3: [391, 92],
+            p4: [518, 107],
+            p47: [518, 7],
+            p5: [617, 118],
+            p6: [714, 109],
+            p7: [785, 94],
+            p8: [900, 112],
+            p9: [218, 309],
+            p10: [310, 290],
+            p11: [412, 297],
+            p12: [508, 319],
+            p13: [614, 302],
+            p14: [691, 288],
+            p15: [805, 293],
+            p16: [888, 284],
+            p17: [214, 504],
+            p18: [315, 492],
+            p19: [395, 503],
+            p20: [519, 509],
+            p21: [602, 490],
+            p22: [688, 519],
+            p23: [809, 483],
+            p24: [910, 492],
+            p25: [203, 718],
+            p26: [313, 692],
+            p27: [390, 715],
+            p28: [482, 693],
+            p29: [617, 684],
+            p30: [709, 706],
+            p31: [798, 690],
+            p32: [887, 708],
+            p33: [310, 882],
+            p34: [391, 906],
+            p35: [488, 913],
+            p36: [614, 892],
+            p37: [705, 901],
+            p38: [783, 917],
+            p39: [195, 1106],
+            p40: [317, 1090],
+            p41: [398, 1083],
+            p42: [509, 1108],
+            p43: [614, 1097],
+            p44: [692, 1104],
+            p45: [810, 1093],
+            p46: [896, 1087],
+        };
+
+        // Define all roads with a default color
+        const roads = [
+            // Horizontal connections
+            { start: 'p1', end: 'p2' }, { start: 'p2', end: 'p3' }, { start: 'p4', end: 'p5' }, { start: 'p4', end: 'p47' },
+            { start: 'p6', end: 'p7' }, { start: 'p7', end: 'p8' }, { start: 'p9', end: 'p10' },
+            { start: 'p10', end: 'p11' }, { start: 'p11', end: 'p12' }, { start: 'p13', end: 'p14' },
+            { start: 'p14', end: 'p15' }, { start: 'p17', end: 'p18' }, { start: 'p18', end: 'p19' },
+            { start: 'p19', end: 'p20' },
+            { start: 'p26', end: 'p27' }, { start: 'p27', end: 'p28' },
+            { start: 'p29', end: 'p30' }, { start: 'p30', end: 'p31' },
+            { start: 'p35', end: 'p36' }, { start: 'p36', end: 'p37' },
+            { start: 'p37', end: 'p38' }, { start: 'p39', end: 'p40' }, { start: 'p40', end: 'p41' }, { start: 'p41', end: 'p42' },
+            { start: 'p42', end: 'p43' }, { start: 'p43', end: 'p44' }, { start: 'p45', end: 'p46' },
+            { start: 'p9', end: 'p17' }, { start: 'p17', end: 'p25' }, { start: 'p25', end: 'p39' },
+            { start: 'p2', end: 'p10' }, { start: 'p26', end: 'p40' },
+            { start: 'p3', end: 'p11' }, { start: 'p11', end: 'p19' }, { start: 'p27', end: 'p41' },
+            { start: 'p4', end: 'p12' }, { start: 'p12', end: 'p20' }, { start: 'p20', end: 'p28' },
+            { start: 'p5', end: 'p13' }, { start: 'p13', end: 'p21' }, { start: 'p21', end: 'p29' }, { start: 'p29', end: 'p43' },
+            { start: 'p6', end: 'p14' }, { start: 'p14', end: 'p22' }, { start: 'p22', end: 'p30' },
+            { start: 'p7', end: 'p15' }, { start: 'p23', end: 'p31' }, { start: 'p31', end: 'p45' },
+            { start: 'p8', end: 'p16' }, { start: 'p16', end: 'p24' }, { start: 'p24', end: 'p32' }, { start: 'p32', end: 'p46' }
+        ];
+
+        // Manually set the path (no URL params needed)
+        const urlParams = new URLSearchParams(window.location.search);
+        const path = urlParams.get('path');
+        console.log(path);
+
+
+        // Parse the path to create an array of point pairs
+        const pathPoints = path ? path.split(',') : [];
+        const highlightedRoads = [];
+        for (let i = 0; i < pathPoints.length - 1; i++) {
+            highlightedRoads.push({ start: pathPoints[i], end: pathPoints[i + 1] });
+        }
+
+        // Draw roads, highlighting the ones in the path
+        roads.forEach(road => {
+            const color = highlightedRoads.some(hr => {
+                // Check both directions: start->end and end->start for the road
+                return (hr.start === road.start && hr.end === road.end) || 
+                       (hr.start === road.end && hr.end === road.start);
+            }) ? 'red' : 'blue'; // Highlight matching roads in red
+            L.polyline([points[road.start], points[road.end]], { color: color, weight: 3 }).addTo(map);
+        });
+
+        // Add markers for each point
+        Object.keys(points).forEach(key => {
+            L.circleMarker(points[key], {
+                radius: 8,
+                color: 'black',
+                fillColor: '#fff',
+                fillOpacity: 1,
+                weight: 2
+            }).addTo(map);
+        });
+    </script>
+</body>
+
+</html>
